@@ -1,0 +1,23 @@
+version: '3.8'
+services:
+  ums-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ums_web:latest
+    ports:
+      - "8083:80"  # App available at localhost:8084
+    volumes:
+      - ./app:/usr/share/nginx/html  # Live mount for manual updates (Phase 1/2)
+    restart: always
+
+  watcher:
+    build:
+      context: .
+      dockerfile: watcher.Dockerfile
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./app:/app
+    command: bash /usr/local/bin/watcher.sh
+
+

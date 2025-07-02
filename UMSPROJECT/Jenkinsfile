@@ -1,0 +1,40 @@
+pipeline {
+    agent any
+    environment {
+        COMPOSE_FILE = 'docker-compose.yml'
+    }
+    stages {
+        stage('Clone UMS Project') {
+            steps {
+                // If using GitHub/Bitbucket/GitLab integration
+                checkout scm
+            }
+        }
+        stage('Build ums-app Docker Image') {
+            steps {
+                echo '🔨 Building Docker image for ums-app...'
+                sh 'docker-compose build ums-app'
+            }
+        }
+        stage('Stop Existing App') {
+            steps {
+                echo '🛑 Stopping running containers...'
+                sh 'docker-compose down'
+            }
+        }
+        stage('Deploy Updated App') {
+            steps {
+                echo '🚀 Deploying updated ums-app container...'
+                sh 'docker-compose up -d ums-app'
+            }
+        }
+    }
+    post {
+        success {
+            echo '✅ Deployment successful! App is live at http://localhost:8084'
+        }
+        failure {
+            echo '❌ Deployment failed. Check the build logs for details.'
+        }
+    }
+}
